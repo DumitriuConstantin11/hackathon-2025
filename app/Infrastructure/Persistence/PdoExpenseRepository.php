@@ -36,6 +36,16 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
     public function save(Expense $expense): void
     {
         // TODO: Implement save() method.
+        $query = "INSERT INTO expenses (user_id, date, category, amount_cents, description) VALUES (?,?,?,?,?)";
+        $params= [
+            $expense->userId,
+            $expense->date->format('Y-m-d'),
+            $expense->category,
+            $expense->amountCents,
+            $expense->description,
+        ];
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
     }
 
     public function delete(int $id): void
@@ -59,8 +69,18 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
 
     public function listExpenditureYears(User $user): array
     {
+        $query = "SELECT date FROM expenses WHERE user_id = :user_id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute(['user_id' => $user->id]);
+        $years=[];
+        foreach ($stmt->fetchAll() as $row) {
+            $date = new DateTimeImmutable($row['date']);
+            $years[] = $date->format('Y');
+        }
+        $years = array_unique($years);
+
         // TODO: Implement listExpenditureYears() method.
-        return [];
+        return $years;
     }
 
     public function sumAmountsByCategory(array $criteria): array
@@ -94,5 +114,23 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
             $data['amount_cents'],
             $data['description'],
         );
+    }
+
+    public function findByUserIdDateRange(int $userId, DateTimeImmutable $startDate, DateTimeImmutable $endDate, int $page, int $pageSize): array {
+        $offset=($page-1)*$pageSize;
+        $query = "SELECT * from expenses WHERE user_id = :user_id AND date BETWEEN :start_date AND :end_date
+                   ORDER BY date DESC
+                   LIMIT :limit OFFSET :offset";
+        $stmt = $this->pdo->prepare($query);
+        $params=[
+            ':user_id' => $userId,
+            ':start_date' => $startDate->format('Y-m-d'),
+            ':end_date' => $endDate->format('Y-m-d'),
+            ':limit' => $pageSize,
+            ':offset' => $offset,
+        ];
+        $stmt->execute($params);
+        $results = $stmt->fetchAll();
+        return array_map([$this, 'createExpenseFromData'], $results);
     }
 }

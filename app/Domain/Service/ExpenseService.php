@@ -18,8 +18,21 @@ class ExpenseService
 
     public function list(User $user, int $year, int $month, int $pageNumber, int $pageSize): array
     {
+        $startDate=new DateTimeImmutable("$year-$month-01");
+        $endDate=new DateTimeImmutable("$year-$month-31");
         // TODO: implement this and call from controller to obtain paginated list of expenses
-        return [];
+        return $this->expenses->findByUserIdDateRange(
+            $user->id,
+            $startDate,
+            $endDate,
+            $pageNumber,
+            $pageSize
+        );
+
+    }
+
+    public function listExpenditureYears(User $user): array {
+        return $this->expenses->listExpenditureYears($user);
     }
 
     public function create(
@@ -30,9 +43,9 @@ class ExpenseService
         string $category,
     ): void {
         // TODO: implement this to create a new expense entity, perform validation, and persist
-
+        $amountCents = (int)round($amount * 100);
         // TODO: here is a code sample to start with
-        $expense = new Expense(null, $user->id, $date, $category, (int)$amount, $description);
+        $expense = new Expense(null, $user->id, $date, $category, $amountCents, $description);
         $this->expenses->save($expense);
     }
 
