@@ -34,8 +34,8 @@ class ExpenseController extends BaseController
 
         // parse request parameters
 
-        $year = (int)($request->getQueryParams()['year'] ?? 0);
-        $month = (int)($request->getQueryParams()['month'] ?? 0);
+        $year = (int)($request->getQueryParams()['year'] ?? date("Y"));
+        $month = (int)($request->getQueryParams()['month'] ?? date("m"));
 
 
         $userId = $_SESSION["user_id"]; // TODO: obtain logged-in user ID from session
@@ -60,12 +60,13 @@ class ExpenseController extends BaseController
     public function create(Request $request, Response $response): Response
     {
         $categories = $this->cbService->getCategory();
+        $today= (new \DateTimeImmutable())->format('Y-m-d');
         // TODO: implement this action method to display the create expense page
 
         // Hints:
         // - obtain the list of available categories from configuration and pass to the view
 
-        return $this->render($response, 'expenses/create.twig', ['categories' => $categories]);
+        return $this->render($response, 'expenses/create.twig', ['categories' => $categories, 'date' => $today]);
     }
 
     public function store(Request $request, Response $response): Response
@@ -76,7 +77,10 @@ class ExpenseController extends BaseController
         $username= $_SESSION["username"];
         $dateInput=$data["date"];
         $date = new \DateTimeImmutable($dateInput);
-        $amount = (int)$data['amount'];
+        $now = new \DateTimeImmutable();
+
+
+        $amount = floatval($data['amount']);
         $description = trim($data['description']);
 
         $category = $data['category'];
@@ -85,11 +89,18 @@ class ExpenseController extends BaseController
         if($amount<=0){
             $errors["amount"] = "Amount trebuie sa fie mai mare ca 0";
         }
+        if(empty($description)){
+           $errors["description"] = "Trebuie scrisa o descriere";
+        }
         if(!$category){
             $errors["category"] = "Trebuie aleasa o categorie";
         }
+        if($date>$now){
+            $errors["date"] = "Datele nu pot fi in viitor";
+        }
         if(!empty($errors)){
-            return $this->render($response, 'expenses/create.twig', ['errors' => $errors]);
+            $categories = $this->cbService->getCategory();
+            return $this->render($response, 'expenses/create.twig', ['errors' => $errors, 'categories' => $categories, 'amount' => $amount, 'description' => $description, 'category' => $category, 'date' => $dateInput]);
         }
 
         $user= new User($userId, $username, "", new \DateTimeImmutable());
