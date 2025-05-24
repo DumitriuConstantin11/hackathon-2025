@@ -32,7 +32,20 @@ class AuthController extends BaseController
     {
         // TODO: call corresponding service to perform user registration
 
-        return $response->withHeader('Location', '/login')->withStatus(302);
+        $data = $request->getParsedBody();
+        $username= trim($data['username']);
+        $password= trim($data['password']);
+
+        $isErrors= "";
+        try {
+            $this->authService->register($username, $password);
+            return $response->withHeader('Location', '/login')->withStatus(302);
+        } catch (\InvalidArgumentException $exc) {
+            $isErrors = $exc->getMessage();
+            return $this->render($response, 'auth/register.twig', ["errors" => $isErrors]);
+        }
+
+//        return $response->withHeader('Location', '/login')->withStatus(302);
     }
 
     public function showLogin(Request $request, Response $response): Response
