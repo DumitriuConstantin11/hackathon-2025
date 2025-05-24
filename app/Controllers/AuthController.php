@@ -56,6 +56,16 @@ class AuthController extends BaseController
     public function login(Request $request, Response $response): Response
     {
         // TODO: call corresponding service to perform user login, handle login failures
+        $data = $request->getParsedBody();
+        $username= trim($data['username']);
+        $password= $data['password'];
+
+        $isErrors= "";
+
+        if(!$this->authService->attempt($username, $password)){
+            $isErrors="Username sau parola invalide";
+            return $this->render($response, 'auth/login.twig', ["errors" => $isErrors]);
+        }
 
         return $response->withHeader('Location', '/')->withStatus(302);
     }
