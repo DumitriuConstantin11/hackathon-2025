@@ -104,10 +104,27 @@ A solution with passing analysis and unit tests will receive extra points.
 ## Delivery details
 
 Participant:
-- Full name: ...
-- Email address: ...
+- Full name: Dumitriu Constantin
+- Email address: titirex22@gmail.com
 
 Features fully implemented:
-- ...
+- register
+- login
+- logout
+- Expenses - List (paginare la 4 elemente, de test)
+- Expenses - Add 
+- Expenses - Edit
+- Expenses - Delete
+- Dashboard
+Extra mile:
+- prepared statements
+- user may change/delete only his/her own expenses
+- Ensure that running composer analyze in project root outputs success message
+- Register user: 
+-- using the proper password hashing function in PHP.
+-- implement a “password again” input for ensuring no password typos.
+- Login user:
+-- using the proper password verify function in PHP.
+- Categories and budget thresholds as configuration options defined in the .env file.
 
 Other instructions about setting up the application (if any): ...
