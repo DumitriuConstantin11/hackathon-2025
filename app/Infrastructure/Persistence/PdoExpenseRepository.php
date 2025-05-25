@@ -98,20 +98,59 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
 
     public function sumAmountsByCategory(array $criteria): array
     {
+        $year= (int)$criteria['year'];
+        $month= (int)$criteria['month'];
+        $start= new \DateTimeImmutable($year . '-' . str_pad((string)$month, 2, '0', STR_PAD_LEFT) . '-01');
+        $primZi= $start->modify('+1 month');
+        $end= $primZi->modify('-1 day');
+        $query= "SELECT category, SUM(amount_cents) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? GROUP BY category";
+        $params=[
+            $criteria['user_id'],
+            $start->format('Y-m-d'),
+            $end->format('Y-m-d')
+        ];
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
         // TODO: Implement sumAmountsByCategory() method.
-        return [];
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
     public function averageAmountsByCategory(array $criteria): array
     {
+        $year= (int)$criteria['year'];
+        $month= (int)$criteria['month'];
+        $start= new \DateTimeImmutable($year . '-' . str_pad((string)$month, 2, '0', STR_PAD_LEFT) . '-01');
+        $primZi= $start->modify('+1 month');
+        $end= $primZi->modify('-1 day');
+        $query= "SELECT category, AVG(amount_cents) as avg FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? GROUP BY category";
+        $params=[
+            $criteria['user_id'],
+            $start->format('Y-m-d'),
+            $end->format('Y-m-d')
+        ];
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
         // TODO: Implement averageAmountsByCategory() method.
-        return [];
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
     public function sumAmounts(array $criteria): float
     {
+        $year= (int)$criteria['year'];
+        $month= (int)$criteria['month'];
+        $start= new \DateTimeImmutable($year . '-' . str_pad((string)$month, 2, '0', STR_PAD_LEFT) . '-01');
+        $primZi= $start->modify('+1 month');
+        $end= $primZi->modify('-1 day');
+        $query= "SELECT SUM(amount_cents) as total FROM expenses WHERE user_id = ? And date BETWEEN ? AND ?";
+        $params=[
+            $criteria['user_id'],
+            $start->format('Y-m-d'),
+            $end->format('Y-m-d')
+        ];
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
         // TODO: Implement sumAmounts() method.
-        return 0;
+        return (float)$stmt->fetchColumn();
     }
 
     /**

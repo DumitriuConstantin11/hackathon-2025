@@ -6,7 +6,9 @@ namespace App;
 
 use App\Domain\Repository\ExpenseRepositoryInterface;
 use App\Domain\Repository\UserRepositoryInterface;
+use App\Domain\Service\AlertGenerator;
 use App\Domain\Service\CBService;
+use App\Domain\Service\MonthlySummaryService;
 use App\Infrastructure\Persistence\PdoExpenseRepository;
 use App\Infrastructure\Persistence\PdoUserRepository;
 use DI\ContainerBuilder;
@@ -58,6 +60,8 @@ class Kernel
                 return $pdo;
             }),
             CBService::class => autowire(CBService::class),
+            MonthlySummaryService::class=> autowire(),
+            AlertGenerator::class=>autowire(),
 
             // Map interfaces to concrete implementations
             UserRepositoryInterface::class    => autowire(PdoUserRepository::class),

@@ -35,8 +35,12 @@ class AuthController extends BaseController
         $data = $request->getParsedBody();
         $username= trim($data['username']);
         $password= trim($data['password']);
-
+        $passwordConfirm= trim($data['password_confirm']);
         $isErrors= "";
+        if($password !== $passwordConfirm){
+            $isErrors .= "Parolele nu sunt la fel";
+            return $this->render($response, 'auth/register.twig', ['errors' => $isErrors]);
+        }
         try {
             $this->authService->register($username, $password);
             return $response->withHeader('Location', '/login')->withStatus(302);

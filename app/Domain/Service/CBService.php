@@ -16,4 +16,7 @@ class CBService {
     public function getBudgets(): array {
         return $this->categoryBudgets;
     }
+    public function getBudgetForCategory(string $category): float {
+        return $this->categoryBudgets[$category];
+    }
 }
