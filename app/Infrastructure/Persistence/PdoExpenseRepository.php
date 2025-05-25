@@ -55,7 +55,6 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
                 $expense->userId
             ];
         }
-        // TODO: Implement save() method.
 
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
@@ -69,15 +68,26 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
 
     public function findBy(array $criteria, int $from, int $limit): array
     {
-        // TODO: Implement findBy() method.
         return [];
     }
 
 
     public function countBy(array $criteria): int
     {
-        // TODO: Implement countBy() method.
-        return 0;
+        $year=(int)$criteria['year'];
+        $month=(int)$criteria['month'];
+        $start= new \DateTimeImmutable($year . '-' . str_pad((string)$month, 2, '0', STR_PAD_LEFT) . '-01');
+        $primZi= $start->modify('+1 month');
+        $end= $primZi->modify('-1 day');
+        $query= "SELECT COUNT(*) FROM expenses WHERE user_id = ? and date BETWEEN ? AND ?";
+        $params=[
+            $criteria['user_id'],
+            $start->format('Y-m-d'),
+            $end->format('Y-m-d'),
+        ];
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
+        return (int)$stmt->fetchColumn();
     }
 
     public function listExpenditureYears(User $user): array
@@ -92,7 +102,6 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
         }
         $years = array_unique($years);
 
-        // TODO: Implement listExpenditureYears() method.
         return $years;
     }
 
@@ -111,7 +120,6 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
         ];
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
-        // TODO: Implement sumAmountsByCategory() method.
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
@@ -130,7 +138,6 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
         ];
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
-        // TODO: Implement averageAmountsByCategory() method.
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
@@ -149,7 +156,6 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
         ];
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
-        // TODO: Implement sumAmounts() method.
         return (float)$stmt->fetchColumn();
     }
 

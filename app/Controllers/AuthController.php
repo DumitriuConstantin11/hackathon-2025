@@ -22,7 +22,6 @@ class AuthController extends BaseController
 
     public function showRegister(Request $request, Response $response): Response
     {
-        // TODO: you also have a logger service that you can inject and use anywhere; file is var/app.log
         $this->logger->info('Register page requested');
 
         return $this->render($response, 'auth/register.twig');
@@ -30,7 +29,6 @@ class AuthController extends BaseController
 
     public function register(Request $request, Response $response): Response
     {
-        // TODO: call corresponding service to perform user registration
 
         $data = $request->getParsedBody();
         $username= trim($data['username']);
@@ -48,8 +46,6 @@ class AuthController extends BaseController
             $isErrors = $exc->getMessage();
             return $this->render($response, 'auth/register.twig', ["errors" => $isErrors]);
         }
-
-//        return $response->withHeader('Location', '/login')->withStatus(302);
     }
 
     public function showLogin(Request $request, Response $response): Response
@@ -59,7 +55,6 @@ class AuthController extends BaseController
 
     public function login(Request $request, Response $response): Response
     {
-        // TODO: call corresponding service to perform user login, handle login failures
         $data = $request->getParsedBody();
         $username= trim($data['username']);
         $password= $data['password'];
@@ -76,7 +71,6 @@ class AuthController extends BaseController
 
     public function logout(Request $request, Response $response): Response
     {
-        // TODO: handle logout by clearing session data and destroying session
         $_SESSION=[];
         session_destroy();
         return $response->withHeader('Location', '/login')->withStatus(302);

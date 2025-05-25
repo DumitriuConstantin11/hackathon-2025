@@ -9,9 +9,6 @@ use App\Domain\Entity\User;
 
 interface ExpenseRepositoryInterface
 {
-    // TODO: please review the list of methods below. Keep in mind these are just provided for guidance,
-    // TODO: and there is no requirement to keep them as they are. Feel free to adapt to your own implementation.
-
     public function findByUserIdDateRange(int $userId, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate, int $page, int $pageSize): array;
     public function save(Expense $expense): void;
 

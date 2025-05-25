@@ -20,7 +20,6 @@ class ExpenseService
     {
         $startDate=new DateTimeImmutable("$year-$month-01");
         $endDate=new DateTimeImmutable("$year-$month-31");
-        // TODO: implement this and call from controller to obtain paginated list of expenses
         return $this->expenses->findByUserIdDateRange(
             $user->id,
             $startDate,
@@ -42,9 +41,7 @@ class ExpenseService
         DateTimeImmutable $date,
         string $category,
     ): void {
-        // TODO: implement this to create a new expense entity, perform validation, and persist
         $amountCents = (int)round($amount * 100);
-        // TODO: here is a code sample to start with
         $expense = new Expense(null, $user->id, $date, $category, $amountCents, $description);
         $this->expenses->save($expense);
     }
@@ -65,18 +62,22 @@ class ExpenseService
         $expense->date = $date;
         $expense->category = $category;
         $this->expenses->save($expense);
-        // TODO: implement this to update expense entity, perform validation, and persist
     }
 
     public function delete(int $id): void {
         $this->expenses->delete($id);
     }
 
+    public function count(User $user, int $year, int $month): int {
+        return $this->expenses->countBy([
+            'user_id' => $user->id,
+            'year' => $year,
+            'month' => $month
+        ]);
+    }
+
     public function importFromCsv(User $user, UploadedFileInterface $csvFile): int
     {
-        // TODO: process rows in file stream, create and persist entities
-        // TODO: for extra points wrap the whole import in a transaction and rollback only in case writing to DB fails
-
         return 0; // number of imported rows
     }
 }

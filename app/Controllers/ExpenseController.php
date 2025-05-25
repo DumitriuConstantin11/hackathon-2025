@@ -13,7 +13,7 @@ use Slim\Views\Twig;
 
 class ExpenseController extends BaseController
 {
-    private const PAGE_SIZE = 20;
+    private const PAGE_SIZE = 3;
 
     public function __construct(
         Twig $view,
@@ -25,18 +25,8 @@ class ExpenseController extends BaseController
 
     public function index(Request $request, Response $response): Response
     {
-        // TODO: implement this action method to display the expenses page
-
-        // Hints:
-        // - use the session to get the current user ID
-        // - use the request query parameters to determine the page number and page size
-        // - use the expense service to fetch expenses for the current user
-
-        // parse request parameters
-
         $year = (int)($request->getQueryParams()['year'] ?? date("Y"));
         $month = (int)($request->getQueryParams()['month'] ?? date("m"));
-
 
         $userId = $_SESSION["user_id"]; // TODO: obtain logged-in user ID from session
         $user = new User($userId, $_SESSION["username"], "", new \DateTimeImmutable());
@@ -45,7 +35,7 @@ class ExpenseController extends BaseController
         $pageSize = (int)($request->getQueryParams()['pageSize'] ?? self::PAGE_SIZE);
 
         $expenses = $this->expenseService->list($user,$year, $month, $page, $pageSize);
-
+        $total = $this->expenseService->count($user, $year, $month);
 
         return $this->render($response, 'expenses/index.twig', [
             'expenses' => $expenses,
@@ -54,6 +44,7 @@ class ExpenseController extends BaseController
             'page' => $page,
             'pageSize' => $pageSize,
             'years' => $years,
+            'total' => $total
         ]);
     }
 
@@ -61,24 +52,17 @@ class ExpenseController extends BaseController
     {
         $categories = $this->cbService->getCategory();
         $today= (new \DateTimeImmutable())->format('Y-m-d');
-        // TODO: implement this action method to display the create expense page
-
-        // Hints:
-        // - obtain the list of available categories from configuration and pass to the view
-
         return $this->render($response, 'expenses/create.twig', ['categories' => $categories, 'date' => $today]);
     }
 
     public function store(Request $request, Response $response): Response
     {
-        // TODO: implement this action method to create a new expense
         $data = $request->getParsedBody();
         $userId= $_SESSION["user_id"];
         $username= $_SESSION["username"];
         $dateInput=$data["date"];
         $date = new \DateTimeImmutable($dateInput);
         $now = new \DateTimeImmutable();
-
 
         $amount = floatval($data['amount']);
         $description = trim($data['description']);
@@ -106,14 +90,6 @@ class ExpenseController extends BaseController
         $user= new User($userId, $username, "", new \DateTimeImmutable());
 
         $this->expenseService->create($user, $amount, $description, $date, $category);
-        // Hints:
-        // - use the session to get the current user ID
-        // - use the expense service to create and persist the expense entity
-        // - rerender the "expenses.create" page with included errors in case of failure
-        // - redirect to the "expenses.index" page in case of success
-
-
-
 
         return $response->withHeader('Location', '/expenses')->withStatus(302);
 
@@ -132,14 +108,6 @@ class ExpenseController extends BaseController
         }
         $categories = $this->cbService->getCategory();
         return $this->render($response, 'expenses/edit.twig', ['expense' => $expense, 'categories' => $categories]);
-        // TODO: implement this action method to display the edit expense page
-
-        // Hints:
-        // - obtain the list of available categories from configuration and pass to the view
-        // - load the expense to be edited by its ID (use route params to get it)
-        // - check that the logged-in user is the owner of the edited expense, and fail with 403 if not
-
-
     }
 
     public function update(Request $request, Response $response, array $routeParams): Response
@@ -178,17 +146,6 @@ class ExpenseController extends BaseController
         }
         $this->expenseService->update($expense, $amount, $description,$date, $category);
         return $response->withHeader('Location', '/expenses')->withStatus(302);
-        // TODO: implement this action method to update an existing expense
-
-        // Hints:
-        // - load the expense to be edited by its ID (use route params to get it)
-        // - check that the logged-in user is the owner of the edited expense, and fail with 403 if not
-        // - get the new values from the request and prepare for update
-        // - update the expense entity with the new values
-        // - rerender the "expenses.edit" page with included errors in case of failure
-        // - redirect to the "expenses.index" page in case of success
-
-
     }
 
     public function destroy(Request $request, Response $response, array $routeParams): Response
@@ -202,13 +159,5 @@ class ExpenseController extends BaseController
         }
         $this->expenseService->delete($expenseId);
         return $response->withHeader('Location', '/expenses')->withStatus(302);
-        // TODO: implement this action method to delete an existing expense
-
-        // - load the expense to be edited by its ID (use route params to get it)
-        // - check that the logged-in user is the owner of the edited expense, and fail with 403 if not
-        // - call the repository method to delete the expense
-        // - redirect to the "expenses.index" page
-
-        return $response;
     }
 }

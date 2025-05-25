@@ -39,8 +39,6 @@ class PdoUserRepository implements UserRepositoryInterface
 
     public function findByUsername(string $username): ?User
     {
-        // TODO: Implement findByUsername() method.
-
         $query = 'SELECT * FROM users WHERE username = :username';
         $stmt = $this->pdo->prepare($query);
         $stmt->execute(['username' => $username]);
@@ -60,8 +58,6 @@ class PdoUserRepository implements UserRepositoryInterface
 
     public function save(User $user): void
     {
-        // TODO: Implement save() method.
-
         $query= "INSERT INTO users (username, password_hash, created_at) VALUES (?,?,?)";
         $params=[
             $user->username,

@@ -8,7 +8,7 @@ use App\Domain\Repository\ExpenseRepositoryInterface;
 use App\Domain\Repository\UserRepositoryInterface;
 use App\Domain\Service\AlertGenerator;
 use App\Domain\Service\CBService;
-use App\Domain\Service\MonthlySummaryService;
+use App\Domain\Service\MonthlyService;
 use App\Infrastructure\Persistence\PdoExpenseRepository;
 use App\Infrastructure\Persistence\PdoUserRepository;
 use DI\ContainerBuilder;
@@ -30,12 +30,11 @@ class Kernel
     public static function createApp(): App
     {
         session_start();
-        // Configure the DI container builder and build the DI container
+
         $builder = new ContainerBuilder();
-        $builder->useAutowiring(true);  // Enable autowiring explicitly
+        $builder->useAutowiring(true);
 
         $builder->addDefinitions([
-            // Define a factory for the Monolog logger with a stream handler that writes to var/app.log
             LoggerInterface::class            => function () {
                 $logger = new Logger('app');
                 $logger->pushHandler(new StreamHandler(__DIR__.'/../var/app.log', Level::Debug));
@@ -43,12 +42,10 @@ class Kernel
                 return $logger;
             },
 
-            // Define a factory for Twig view renderer
             Twig::class                       => function () {
                 return Twig::create(__DIR__.'/../templates', ['cache' => false]);
             },
 
-            // Define a factory for PDO database connection
             PDO::class                        => factory(function () {
                 static $pdo = null;
                 if ($pdo === null) {
@@ -60,7 +57,7 @@ class Kernel
                 return $pdo;
             }),
             CBService::class => autowire(CBService::class),
-            MonthlySummaryService::class=> autowire(),
+            MonthlyService::class=> autowire(),
             AlertGenerator::class=>autowire(),
 
             // Map interfaces to concrete implementations
@@ -69,17 +66,12 @@ class Kernel
         ]);
         $container = $builder->build();
 
-        // Create an application instance and configure
         AppFactory::setContainer($container);
         $app = AppFactory::create();
         $app->add(TwigMiddleware::createFromContainer($app, Twig::class));
         (require __DIR__.'/../config/settings.php')($app);
         (require __DIR__.'/../config/routes.php')($app);
 
-        // TODO: Handle session initialization
-
-        // Make current user ID globally available to twig templates
-        // TODO: change the following line to set the user ID stored in the session, for when user is logged
         $loggedInUserId = $_SESSION["user_id"] ?? null;
         $loggedInUsername=$_SESSION["username"] ?? null;
 
