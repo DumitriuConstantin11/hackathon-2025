@@ -49,6 +49,10 @@ class ExpenseService
         $this->expenses->save($expense);
     }
 
+    public function findById(int $id): Expense {
+        return $this->expenses->find($id);
+    }
+
     public function update(
         Expense $expense,
         float $amount,
@@ -56,7 +60,16 @@ class ExpenseService
         DateTimeImmutable $date,
         string $category,
     ): void {
+        $expense->amountCents = (int)round($amount * 100);
+        $expense->description = $description;
+        $expense->date = $date;
+        $expense->category = $category;
+        $this->expenses->save($expense);
         // TODO: implement this to update expense entity, perform validation, and persist
+    }
+
+    public function delete(int $id): void {
+        $this->expenses->delete($id);
     }
 
     public function importFromCsv(User $user, UploadedFileInterface $csvFile): int

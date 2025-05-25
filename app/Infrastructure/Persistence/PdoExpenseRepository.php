@@ -35,15 +35,28 @@ class PdoExpenseRepository implements ExpenseRepositoryInterface
 
     public function save(Expense $expense): void
     {
+        if($expense->id === null) {
+            $query = "INSERT INTO expenses (user_id, date, category, amount_cents, description) VALUES (?,?,?,?,?)";
+            $params= [
+                $expense->userId,
+                $expense->date->format('Y-m-d'),
+                $expense->category,
+                $expense->amountCents,
+                $expense->description,
+            ];
+        } else {
+            $query = "UPDATE expenses SET date = ?, category = ?, amount_cents = ?, description = ? WHERE id = ? AND user_id = ?";
+            $params = [
+                $expense->date->format('Y-m-d'),
+                $expense->category,
+                $expense->amountCents,
+                $expense->description,
+                $expense->id,
+                $expense->userId
+            ];
+        }
         // TODO: Implement save() method.
-        $query = "INSERT INTO expenses (user_id, date, category, amount_cents, description) VALUES (?,?,?,?,?)";
-        $params= [
-            $expense->userId,
-            $expense->date->format('Y-m-d'),
-            $expense->category,
-            $expense->amountCents,
-            $expense->description,
-        ];
+
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
     }
